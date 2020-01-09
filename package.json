@@ -6,10 +6,18 @@
   "author": "Jorge Rossi <jorgefzrossi@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
   },
   "dependencies": {
+    "bcrypt": "^3.0.7",
     "cors": "^2.8.5",
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "knex": "^0.20.7",
+    "pg": "^7.17.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.2"
   }
 }
