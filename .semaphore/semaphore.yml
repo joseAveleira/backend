@@ -1,17 +1,21 @@
 version: v1.0
-name: Docker
+name: Pushing a Docker image
 agent:
   machine:
     type: e1-standard-2
     os_image: ubuntu1804
+
 blocks:
-  - name: Build
+  - name: Push Docker image to registry
     task:
       jobs:
-        - name: docker build
-          commands:
-            - checkout
-            - docker build -t your-image .
-            - >-
-              echo "Push an image ->
-              https://docs.semaphoreci.com/use-cases/working-with-docker/#pushing-a-docker-image-to-a-registry"
+      - name: Docker Hub
+        commands:
+          - checkout
+          - echo $DOCKER_PASSWORD | docker login --username "$DOCKER_USERNAME" --password-stdin
+          - docker build -t backend:latest .
+          - docker tag backend:latest "$DOCKER_USERNAME"/backend:latest
+          - docker push "$DOCKER_USERNAME"/backend:latest
+
+      secrets:
+      - name: docker-hub
