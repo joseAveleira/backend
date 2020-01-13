@@ -6,8 +6,8 @@
   "author": "Jorge Rossi <jorgefzrossi@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start": "node src/index.js",
-    "dev": "nodemon src/index.js"
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js"
   },
   "dependencies": {
     "bcrypt": "^3.0.7",

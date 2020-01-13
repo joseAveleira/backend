@@ -1,37 +1,47 @@
 // Update with your config settings.
 
 module.exports = {
+
   development: {
-    client: 'pg',
+    client: 'postgresql',
     connection: {
-      host: '127.0.0.1',
+      host: 'localhost',
+      database: 'scoreboard',
       user: 'postgres',
-      password: '1234',
-      database: 'postgres',
-      charset: 'utf8'
+      password: '1234'
+    },
+    pool: {
+      min: 2,
+      max: 10
     },
     migrations: {
-      directory: __dirname + '/database/migrations',
+      tableName: 'knex_migrations',
+      directory: './src/database/migrations'
     },
     seeds: {
-      directory: __dirname + '/database/seeds'
+      directory: './src/database/seeds'
     }
   },
 
   production: {
-    client: 'pg',
+    client: 'postgresql',
     connection: {
       host: process.env.DB_HOST,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      charset: 'utf8'
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD
+    },
+    pool: {
+      min: 2,
+      max: 10
     },
     migrations: {
-      directory: __dirname + '/database/migrations',
+      tableName: 'knex_migrations',
+      directory: './src/database/migrations'
     },
     seeds: {
-      directory: __dirname + '/database/seeds'
+      directory: './src/database/seeds'
     }
   }
+
 };
