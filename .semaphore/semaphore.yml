@@ -14,8 +14,8 @@ blocks:
           - checkout
           - echo $DOCKER_PASSWORD | docker login --username "$DOCKER_USERNAME" --password-stdin
           - docker build -t backend:latest .
-          - docker tag backend:latest "$DOCKER_USERNAME"/backend:latest
-          - docker push "$DOCKER_USERNAME"/backend:latest
+          - docker tag backend:latest scoreboardtcc/backend:latest
+          - docker push scoreboardtcc/backend:latest
 
       secrets:
       - name: docker-hub
