@@ -22,6 +22,7 @@ jobs:
           root: .
           paths:
             - ./image.tar
+
   publish-latest:
     executor: docker-publisher
     steps:
@@ -36,6 +37,15 @@ jobs:
           command: |
             echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
             docker push $IMAGE_NAME:latest
+
+  deploy:
+    executor: docker-publisher
+    steps:
+      - setup_remote_docker
+      - run:
+          name: Update running service
+          command: ssh root@scoreboard.tech "docker-compose pull && docker-compose up -d --no-deps --build backend"
+
 workflows:
   version: 2
   build-master:
