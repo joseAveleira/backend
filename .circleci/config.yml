@@ -3,6 +3,7 @@ executors:
   docker-publisher:
     environment:
       IMAGE_NAME: scoreboardtcc/backend
+      SERVICE_NAME: backend
     docker:
       - image: circleci/buildpack-deps:stretch
 jobs:
@@ -44,7 +45,7 @@ jobs:
       - setup_remote_docker
       - run:
           name: Update running service
-          command: ssh -o "StrictHostKeyChecking=no" root@scoreboard.tech "docker-compose pull && docker-compose up -d --no-deps --build backend"
+          command: ssh -o "StrictHostKeyChecking=no" root@scoreboard.tech "docker-compose pull && docker-compose up -d --no-deps --build $SERVICE_NAME"
 
 workflows:
   version: 2

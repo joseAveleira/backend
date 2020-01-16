@@ -3,8 +3,8 @@ exports.up = function (knex) {
     return knex.schema
         .createTable('admins', table => {
             table.string('username').primary()
-            table.string('name')
-            table.string('password')
+            table.string('name').notNullable()
+            table.string('password').notNullable()
         })
 
 };
