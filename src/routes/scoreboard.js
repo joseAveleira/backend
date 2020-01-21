@@ -3,6 +3,6 @@ const ScoreboardController = require('../controllers/scoreboard')
 
 const router = express.Router()
 
-router.post('/scoreboard', ScoreboardController.index)
+router.get('/', ScoreboardController.index)
 
 module.exports = router

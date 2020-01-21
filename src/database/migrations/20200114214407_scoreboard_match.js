@@ -11,7 +11,7 @@ exports.up = function (knex) {
             table.timestamps(true, true)
         })
         .createTable('scoreboards', table => {
-            table.increments('id').primary()
+            table.string('topic').primary()
             table.string('name').notNullable()
             table.integer('match_id').references('id').inTable('matches')
         })

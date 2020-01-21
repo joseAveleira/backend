@@ -6,12 +6,12 @@ exports.seed = function (knex) {
       // Inserts seed entries
       return knex('scoreboards').insert([
         {
-          id: 1,
+          topic: 'scoreboard1',
           name: 'Placar 1',
           match_id: 1
         },
         {
-          id: 2,
+          topic: 'scoreboard2',
           name: 'Placar 2',
         }
       ]);
