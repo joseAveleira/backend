@@ -13,7 +13,7 @@ class ScoreboardController {
                 match: it.match_id ? {
                     player1_name: it.player1_name,
                     player2_name: it.player2_name,
-                    start_time: it.created_at
+                    start_time: new Date(it.start_time)
                 } : null
             }))
 

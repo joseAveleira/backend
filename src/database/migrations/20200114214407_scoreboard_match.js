@@ -8,7 +8,7 @@ exports.up = function (knex) {
             table.enu('tiebreak_type', ['REGULAR', 'TEN_POINTS']).notNullable().defaultTo('REGULAR')
             table.boolean('advantage').notNullable().defaultTo(true)
             table.enu('score_type', ['BASIC', 'ADVANCED']).notNullable().defaultTo('BASIC')
-            table.timestamps(true, true)
+            table.datetime('start_time').defaultTo(knex.fn.now())
         })
         .createTable('scoreboards', table => {
             table.string('topic').primary()
