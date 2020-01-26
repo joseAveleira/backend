@@ -8,7 +8,7 @@ const server = new mosca.Server({
         db: 12,
         port: 6379,
         return_buffers: true,
-        host: 'localhost'
+        host: 'redis'
     },
     http: {
         port: 81,
