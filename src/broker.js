@@ -1,5 +1,7 @@
 const mosca = require('mosca')
 
+console.log('#debug', process.env.NODE_ENV)
+
 const server = new mosca.Server({
     port: 1883,
     backend: {
