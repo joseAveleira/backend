@@ -1,27 +1,25 @@
 const mosca = require('mosca')
 
-console.log('#debug', process.env.NODE_ENV)
+try {
+    const server = new mosca.Server({
+        port: 1883,
+        backend: {
+            type: 'mongo',
+            url: `mongodb://${process.env.NODE_ENV === 'production' ? 'mongodb' : 'localhost'}:27017/mqtt`,
+            pubsubCollection: 'scoreboard',
+            mongo: {}
+        },
+        http: {
+            port: 81,
+            bundle: true,
+            static: './'
+        },
+    })
 
-const server = new mosca.Server({
-    port: 1883,
-    backend: {
-        type: 'redis',
-        redis: require('redis'),
-        db: 12,
-        port: 6379,
-        return_buffers: true,
-        host: process.env.NODE_ENV === 'production' ? 'redis' : 'localhost'
-    },
-    http: {
-        port: 81,
-        bundle: true,
-        static: './'
-    },
-    persistence: {
-        factory: mosca.persistence.Redis
-    }
-})
+    server.on('ready', () => {
+        console.log("Broker executando")
+    })
 
-server.on('ready', () => {
-    console.log("Broker executando")
-})
+} catch (error) {
+    console.log('pei', error)
+}    
