@@ -17,8 +17,6 @@ class ScoreboardController {
                 } : null
             }))
 
-            console.log(scoreboards)
-
             return res.status(200).json({ message: 'scoreboards found', data: scoreboards })
         } catch (error) {
             res.status(500).json({ message: error.toString() })
