@@ -3,8 +3,8 @@ exports.up = function (knex) {
     return knex.schema
         .createTable('matches', table => {
             table.increments('id').primary()
-            table.string('player1_name').notNullable()
-            table.string('player2_name').notNullable()
+            table.string('player1_name')
+            table.string('player2_name')
             table.enu('tiebreak_type', ['REGULAR', 'TEN_POINTS']).notNullable().defaultTo('REGULAR')
             table.boolean('advantage').notNullable().defaultTo(true)
             table.enu('score_type', ['BASIC', 'ADVANCED']).notNullable().defaultTo('BASIC')
@@ -13,6 +13,8 @@ exports.up = function (knex) {
         .createTable('scoreboards', table => {
             table.string('topic').primary()
             table.string('name').notNullable()
+            table.string('publish_token')
+            table.string('refresh_token')
             table.integer('match_id').references('id').inTable('matches')
         })
 };

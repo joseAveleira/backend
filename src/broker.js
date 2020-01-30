@@ -19,6 +19,14 @@ const server = new mosca.Server({
     }
 })
 
+// server.authorizePublish = (client, topic, payload, callback) => {
+//     console.log('[authorizePublish]', topic, payload)
+
+//     callback(null, true)
+// }
+
 server.on('ready', () => {
     console.log("Broker executando")
 })
+
+module.exports = server
