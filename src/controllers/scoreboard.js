@@ -7,6 +7,7 @@ class ScoreboardController {
         try {
             let scoreboards = await knex('scoreboards')
                 .leftJoin('matches', 'scoreboards.match_id', '=', 'matches.id')
+                .orderBy('scoreboards.topic')
 
             scoreboards = scoreboards.map(it => ({
                 topic: it.topic,
