@@ -68,7 +68,8 @@ class MatchController {
 
             topics.forEach(topic => broker.publish({
                 topic: `${scoreboardTopic}/${topic}`,
-                payload: '0'
+                payload: Buffer.from('0'),
+                retain: true
             }))
 
             res.json({ message: 'match_created', publish_token: publishToken, refresh_token: refreshToken })
