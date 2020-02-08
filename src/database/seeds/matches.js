@@ -6,7 +6,6 @@ exports.seed = function (knex) {
       // Inserts seed entries
       return knex('matches').insert([
         {
-          id: 1,
           player1_name: 'Federer',
           player2_name: 'Nadal',
           tiebreak_type: 'REGULAR',
@@ -14,7 +13,6 @@ exports.seed = function (knex) {
           score_type: 'BASIC'
         },
         {
-          id: 2,
           player1_name: 'Federer',
           player2_name: 'Djokovic',
           tiebreak_type: 'REGULAR',
@@ -22,7 +20,6 @@ exports.seed = function (knex) {
           score_type: 'BASIC'
         },
         {
-          id: 3,
           player1_name: 'Foo',
           player2_name: 'Bar',
           tiebreak_type: 'TEN_POINTS',
