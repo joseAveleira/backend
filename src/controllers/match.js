@@ -5,7 +5,6 @@ const broker = require('../broker')
 class MatchController {
     async create(req, res) {
         try {
-
             const {
                 scoreboard_topic: scoreboardTopic,
                 player1_name: player1Name,
@@ -78,6 +77,15 @@ class MatchController {
             res.status(500).json({ message: error.toString() })
         }
     }
+
+    async addLog(req, res) {
+        try {
+
+        } catch (error) {
+            res.status(500).json({ message: error.toString() })
+        }
+    }
+
 }
 
 module.exports = new MatchController()

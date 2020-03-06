@@ -10,7 +10,7 @@ const server = new mosca.Server({
         mongo: {}
     },
     http: {
-        port: 81,
+        port: 8081,
         bundle: true,
         static: './'
     },
