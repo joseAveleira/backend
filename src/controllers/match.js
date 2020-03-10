@@ -63,13 +63,29 @@ class MatchController {
                     refresh_token: refreshToken
                 })
 
-            const topics = ['Set1_A', 'Set1_B', 'Set2_A', 'Set2_B', 'Set3_A', 'Set3_B', 'Score_A', 'Score_B']
+            const topics = ['Set1_A',
+                'Set1_B',
+                'Set2_A',
+                'Set2_B',
+                'Set3_A',
+                'Set3_B',
+                'Score_A',
+                'Score_B',
+                'Current_Set',
+                'Is_Set_Tiebreak',
+                'Is_Match_Tiebreak']
 
             topics.forEach(topic => broker.publish({
                 topic: `${scoreboardTopic}/${topic}`,
                 payload: Buffer.from('0'),
                 retain: true
             }))
+
+            broker.publish({
+                topic: `${scoreboardTopic}/matchWinner`,
+                payload: Buffer.from('null'),
+                retain: true
+            })
 
             res.json({ message: 'match_created', publish_token: publishToken, refresh_token: refreshToken })
 
