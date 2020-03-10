@@ -15,13 +15,52 @@ class ScoreboardController {
                 match: it.match_id ? {
                     player1_name: it.player1_name,
                     player2_name: it.player2_name,
-                    start_time: new Date(it.start_time)
+                    start_time: new Date(it.start_time),
                 } : null
             }))
 
             return res.status(200).json({ message: 'scoreboards found', data: scoreboards })
         } catch (error) {
             res.status(500).json({ message: error.toString() })
+        }
+    }
+
+    async get(req, res) {
+        try {
+
+            const { scoreboard_topic: scoreboardTopic } = req.params
+
+            if (!scoreboardTopic) {
+                return res.status(400).json({ message: 'invalid_scoreboard_topic' })
+            }
+
+            let scoreboard = await knex('scoreboards')
+                .where({ topic: scoreboardTopic })
+                .leftJoin('matches', 'scoreboards.match_id', '=', 'matches.id')
+                .first()
+
+
+            if (!scoreboard) {
+                return res.status(400).json({ message: 'scoreboard_not_found' })
+            }
+
+            scoreboard = {
+                topic: scoreboard.topic,
+                name: scoreboard.name,
+                match: scoreboard.match_id ? {
+                    player1_name: scoreboard.player1_name,
+                    player2_name: scoreboard.player2_name,
+                    tiebreak_type: scoreboard.tiebreak_type,
+                    advantage: scoreboard.advantage,
+                    score_type: scoreboard.score_type,
+                    start_time: new Date(scoreboard.start_time)
+                } : null
+            }
+
+            return res.status(200).json({ message: 'scoreboard found', data: scoreboard })
+        } catch (error) {
+            res.status(500).json({ message: error.toString() })
+
         }
     }
 
