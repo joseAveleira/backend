@@ -82,7 +82,7 @@ class MatchController {
             }))
 
             broker.publish({
-                topic: `${scoreboardTopic}/matchWinner`,
+                topic: `${scoreboardTopic}/Match_Winner`,
                 payload: Buffer.from('null'),
                 retain: true
             })
