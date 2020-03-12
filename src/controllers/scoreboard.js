@@ -1,5 +1,6 @@
 const crypto = require('crypto')
 const knex = require('../database')
+const broker = require('../broker')
 
 class ScoreboardController {
 
@@ -133,6 +134,68 @@ class ScoreboardController {
                 })
 
             res.json({ message: 'tokens_refreshed', publish_token: newPublishToken, refresh_token: newRefreshToken })
+
+        } catch (error) {
+            res.status(500).json({ message: error.toString() })
+        }
+    }
+
+    async finishMatch(req, res) {
+        try {
+            const { scoreboard_topic: scoreboardTopic } = req.params
+
+            if (!scoreboardTopic) {
+                return res.status(400).json({ message: 'invalid_scoreboard_topic' })
+            }
+
+            const scoreboard = await knex('scoreboards')
+                .where({ topic: scoreboardTopic })
+                .first()
+
+            if (!scoreboard) {
+                return res.status(400).json({ message: 'scoreboard_not_found' })
+            }
+
+            if (!scoreboard.match_id) {
+                return res.status(400).json({ message: 'match_not_found' })
+            }
+
+            await knex('scoreboards')
+                .where({ topic: scoreboardTopic })
+                .update({ publish_token: null, refresh_token: null, match_id: null })
+
+            await knex('matches')
+                .where({ id: scoreboard.match_id })
+                .del()
+
+            const topics = ['Set1_A',
+                'Set1_B',
+                'Set2_A',
+                'Set2_B',
+                'Set3_A',
+                'Set3_B',
+                'Score_A',
+                'Score_B',
+                'Current_Set',
+                'Is_Set_Tiebreak',
+                'Is_Match_Tiebreak']
+
+            topics.forEach(topic => broker.publish({
+                topic: `${scoreboardTopic}/${topic}`,
+                payload: '',
+                qos: 1,
+                retain: true
+            }))
+
+            broker.publish({
+                topic: `${scoreboardTopic}/Match_Winner`,
+                payload: '',
+                qos: 1,
+                retain: true
+            })
+
+            res.status(200).json({ message: 'match_finished' })
+
 
         } catch (error) {
             res.status(500).json({ message: error.toString() })

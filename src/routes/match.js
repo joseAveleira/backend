@@ -1,6 +1,6 @@
 const express = require('express')
 const MatchController = require('../controllers/match')
-const AdminAuthMiddleware = require('../middlewares/auth')
+const { AdminAuthMiddleware } = require('../middlewares/auth')
 
 const router = express.Router()
 

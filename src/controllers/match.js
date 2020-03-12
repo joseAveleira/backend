@@ -78,6 +78,7 @@ class MatchController {
             topics.forEach(topic => broker.publish({
                 topic: `${scoreboardTopic}/${topic}`,
                 payload: Buffer.from('0'),
+                qos: 1,
                 retain: true
             }))
 
@@ -101,7 +102,6 @@ class MatchController {
             res.status(500).json({ message: error.toString() })
         }
     }
-
 }
 
 module.exports = new MatchController()
