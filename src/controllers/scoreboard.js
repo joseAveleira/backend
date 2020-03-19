@@ -1,6 +1,6 @@
 const crypto = require('crypto')
 const knex = require('../database')
-const broker = require('../broker')
+const { broker, checkPublishToken } = require('../broker')
 
 class ScoreboardController {
 
@@ -30,6 +30,7 @@ class ScoreboardController {
         try {
 
             const { scoreboard_topic: scoreboardTopic } = req.params
+            const { publish_token: publishToken } = req.headers
 
             if (!scoreboardTopic) {
                 return res.status(400).json({ message: 'invalid_scoreboard_topic' })
@@ -55,7 +56,8 @@ class ScoreboardController {
                     advantage: scoreboard.advantage,
                     score_type: scoreboard.score_type,
                     start_time: new Date(scoreboard.start_time)
-                } : null
+                } : null,
+                has_control: await checkPublishToken(scoreboardTopic, publishToken)
             }
 
             return res.status(200).json({ message: 'scoreboard found', data: scoreboard })

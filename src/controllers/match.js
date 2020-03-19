@@ -1,6 +1,6 @@
 const crypto = require('crypto')
 const knex = require('../database')
-const broker = require('../broker')
+const { broker } = require('../broker')
 
 class MatchController {
     async create(req, res) {

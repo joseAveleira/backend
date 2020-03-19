@@ -1,7 +1,7 @@
 const mosca = require('mosca')
 const knex = require('./database')
 
-const server = new mosca.Server({
+const broker = new mosca.Server({
     port: 1883,
     backend: {
         type: 'mongo',
@@ -20,7 +20,21 @@ const server = new mosca.Server({
     }
 })
 
-server.authorizePublish = async (client, topic, payload, callback) => {
+checkPublishToken = async (scoreboardTopic, publishToken) => {
+    try {
+        const scoreboard = await knex('scoreboards')
+            .where({ topic: scoreboardTopic, publish_token: publishToken })
+            .first()
+
+        console.log({ scoreboard })
+
+        return scoreboard != null
+    } catch (error) {
+        return false
+    }
+}
+
+broker.authorizePublish = async (client, topic, payload, callback) => {
     try {
         const [scoreboardTopic, field] = topic.split('/')
 
@@ -34,15 +48,7 @@ server.authorizePublish = async (client, topic, payload, callback) => {
             return callback(null, false)
         }
 
-        const scoreboard = await knex('scoreboards')
-            .where({ topic: scoreboardTopic })
-            .first()
-
-        if (!scoreboard) {
-            return callback(null, false)
-        }
-
-        if (scoreboard.publish_token !== data.publish_token) {
+        if (!checkPublishToken(scoreboardTopic, data.publish_token)) {
             return callback(null, false)
         }
 
@@ -53,8 +59,8 @@ server.authorizePublish = async (client, topic, payload, callback) => {
     }
 }
 
-server.on('ready', () => {
+broker.on('ready', () => {
     console.log("Broker executando")
 })
 
-module.exports = server
+module.exports = { broker, checkPublishToken }
