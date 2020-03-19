@@ -46,7 +46,7 @@ broker.authorizePublish = async (client, topic, payload, callback) => {
             return callback(null, false)
         }
 
-        if (!checkPublishToken(scoreboardTopic, data.publish_token)) {
+        if (!await checkPublishToken(scoreboardTopic, data.publish_token)) {
             return callback(null, false)
         }
 
