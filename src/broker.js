@@ -26,8 +26,6 @@ checkPublishToken = async (scoreboardTopic, publishToken) => {
             .where({ topic: scoreboardTopic, publish_token: publishToken })
             .first()
 
-        console.log({ scoreboard })
-
         return scoreboard != null
     } catch (error) {
         return false
