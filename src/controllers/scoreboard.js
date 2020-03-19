@@ -30,7 +30,7 @@ class ScoreboardController {
         try {
 
             const { scoreboard_topic: scoreboardTopic } = req.params
-            const { publish_token: publishToken } = req.headers
+            const { "publish-token": publishToken } = req.headers
 
             if (!scoreboardTopic) {
                 return res.status(400).json({ message: 'invalid_scoreboard_topic' })
