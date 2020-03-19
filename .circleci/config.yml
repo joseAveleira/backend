@@ -45,7 +45,7 @@ jobs:
       - setup_remote_docker
       - run:
           name: Update running service
-          command: ssh -o "StrictHostKeyChecking=no" root@scoreboard.tech "docker-compose pull && docker-compose up -d --no-deps --build $SERVICE_NAME"
+          command: ssh -o "StrictHostKeyChecking=no" root@server.scoreboard.tech "docker-compose pull && docker-compose up -d --no-deps --build $SERVICE_NAME"
 
 workflows:
   version: 2
