@@ -40,6 +40,10 @@ broker.authorizePublish = async (client, topic, payload, callback) => {
             return callback(null, false)
         }
 
+        if (field === 'publisher') {
+            return callback(null, false)
+        }
+
         const data = JSON.parse(payload.toString())
 
         if (!data || !data.publish_token) {

@@ -102,6 +102,12 @@ class ScoreboardController {
                     refresh_token: newRefreshToken
                 })
 
+            await broker.publish({
+                topic: `${scoreboardTopic}/publisher`,
+                payload: `${Math.floor(Math.random() * (1000000 + 1))}`,
+                qos: 1,
+            })
+
             res.json({ message: 'tokens_refreshed', publish_token: newPublishToken, refresh_token: newRefreshToken })
 
         } catch (error) {
@@ -134,6 +140,12 @@ class ScoreboardController {
                     publish_token: newPublishToken,
                     refresh_token: newRefreshToken
                 })
+
+            await broker.publish({
+                topic: `${scoreboardTopic}/publisher`,
+                payload: `${Math.floor(Math.random() * (1000000 + 1))}`,
+                qos: 1,
+            })
 
             res.json({ message: 'tokens_refreshed', publish_token: newPublishToken, refresh_token: newRefreshToken })
 
