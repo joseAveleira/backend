@@ -174,6 +174,10 @@ class ScoreboardController {
         .where({ topic: scoreboardTopic })
         .update({ publish_token: null, refresh_token: null, match_id: null });
 
+      await knex('logs')
+        .where({ match_id: scoreboard.match_id })
+        .del();
+
       await knex('matches')
         .where({ id: scoreboard.match_id })
         .del();
@@ -203,6 +207,7 @@ class ScoreboardController {
         qos: 1,
         retain: true,
       });
+
 
       res.status(200).json({ message: 'match_finished' });
     } catch (error) {

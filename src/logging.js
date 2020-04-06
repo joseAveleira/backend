@@ -14,7 +14,7 @@ function getScoreMessage(playerName, scoreType) {
   }
 
   if (scoreType === 'DOUBLE_FAULT') {
-    return `${playerName} pontuou por uma Dupla Falta do oponente`;
+    return `${playerName} pontuou por uma Dupla Falta do oponente.`;
   }
 
   return '';
