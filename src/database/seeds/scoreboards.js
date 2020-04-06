@@ -2,16 +2,15 @@
 exports.seed = function (knex) {
   // Deletes ALL existing entries
   return knex('scoreboards').del()
-    .then(function () {
+    .then(() =>
       // Inserts seed entries
-      return knex('scoreboards').insert(
+      knex('scoreboards').insert(
         Array
           .from(Array(10).keys())
-          .map(i => ({
+          .map((i) => ({
             topic: `scoreboard${i}`,
-            name: `Placar ${i}`
-          }))
+            name: `Placar ${i}`,
+          })),
 
-      );
-    });
+      ));
 };

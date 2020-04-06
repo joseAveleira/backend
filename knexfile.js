@@ -8,19 +8,19 @@ module.exports = {
       host: 'localhost',
       database: 'scoreboard',
       user: 'postgres',
-      password: '1234'
+      password: '1234',
     },
     pool: {
       min: 2,
-      max: 10
+      max: 10,
     },
     migrations: {
       tableName: 'knex_migrations',
-      directory: './src/database/migrations'
+      directory: './src/database/migrations',
     },
     seeds: {
-      directory: './src/database/seeds'
-    }
+      directory: './src/database/seeds',
+    },
   },
 
   production: {
@@ -29,19 +29,19 @@ module.exports = {
       host: process.env.DB_HOST,
       database: process.env.DB_NAME,
       user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD
+      password: process.env.DB_PASSWORD,
     },
     pool: {
       min: 2,
-      max: 10
+      max: 10,
     },
     migrations: {
       tableName: 'knex_migrations',
-      directory: './src/database/migrations'
+      directory: './src/database/migrations',
     },
     seeds: {
-      directory: './src/database/seeds'
-    }
-  }
+      directory: './src/database/seeds',
+    },
+  },
 
 };
