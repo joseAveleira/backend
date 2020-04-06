@@ -1,14 +1,13 @@
-const express = require('express')
-const cors = require('cors')
-const routes = require('./routes')
-require('./mongoose')
-require('./broker')
+const express = require('express');
+const cors = require('cors');
+const routes = require('./routes');
+require('./broker');
 
-const app = express()
+const app = express();
 
-app.use(cors())
-app.use(express.json())
+app.use(cors());
+app.use(express.json());
 
-app.use('/', routes)
+app.use('/', routes);
 
-app.listen(8080, () => console.log('Servidor executando'))
+app.listen(8080, () => console.log('Servidor executando'));

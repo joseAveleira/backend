@@ -1,10 +1,10 @@
-const express = require('express')
-const MatchController = require('../controllers/match')
-const { AdminAuthMiddleware } = require('../middlewares/auth')
+const express = require('express');
+const MatchController = require('../controllers/match');
+const { AdminAuthMiddleware } = require('../middlewares/auth');
 
-const router = express.Router()
+const router = express.Router();
 
-router.post('/', AdminAuthMiddleware, MatchController.create)
-router.post('/log', MatchController.addLog)
+router.post('/', AdminAuthMiddleware, MatchController.create);
+router.get('/:match_id/logs', MatchController.getLogs);
 
-module.exports = router
+module.exports = router;
