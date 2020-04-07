@@ -105,6 +105,13 @@ class MatchController {
         retain: true,
       });
 
+      const players = ['0', '1'];
+      broker.publish({
+        topic: `${scoreboardTopic}/Player_Serving`,
+        payload: Buffer.from(players[Math.floor(Math.random() * players.length)]),
+        retain: true,
+      });
+
       res.json({ message: 'match_created', publish_token: publishToken, refresh_token: refreshToken });
     } catch (error) {
       res.status(500).json({ message: error.toString() });
