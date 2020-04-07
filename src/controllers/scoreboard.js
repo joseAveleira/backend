@@ -182,7 +182,8 @@ class ScoreboardController {
         .where({ id: scoreboard.match_id })
         .del();
 
-      const topics = ['Set1_A',
+      const topics = [
+        'Set1_A',
         'Set1_B',
         'Set2_A',
         'Set2_B',
@@ -192,7 +193,9 @@ class ScoreboardController {
         'Score_B',
         'Current_Set',
         'Is_Set_Tiebreak',
-        'Is_Match_Tiebreak'];
+        'Is_Match_Tiebreak',
+        'Match_Winner',
+        'Player_Serving'];
 
       topics.forEach((topic) => broker.publish({
         topic: `${scoreboardTopic}/${topic}`,
@@ -200,14 +203,6 @@ class ScoreboardController {
         qos: 1,
         retain: true,
       }));
-
-      broker.publish({
-        topic: `${scoreboardTopic}/Match_Winner`,
-        payload: '',
-        qos: 1,
-        retain: true,
-      });
-
 
       res.status(200).json({ message: 'match_finished' });
     } catch (error) {
