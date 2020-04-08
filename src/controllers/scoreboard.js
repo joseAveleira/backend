@@ -170,41 +170,47 @@ class ScoreboardController {
         return res.status(400).json({ message: 'match_not_found' });
       }
 
-      await knex('scoreboards')
-        .where({ topic: scoreboardTopic })
-        .update({ publish_token: null, refresh_token: null, match_id: null });
+      setTimeout(async () => {
+        await knex.transaction(async (trx) => {
+          await trx('logs')
+            .where({ match_id: scoreboard.match_id })
+            .del();
 
-      await knex('logs')
-        .where({ match_id: scoreboard.match_id })
-        .del();
+          await trx('scoreboards')
+            .where({ topic: scoreboardTopic })
+            .update({ publish_token: null, refresh_token: null, match_id: null });
 
-      await knex('matches')
-        .where({ id: scoreboard.match_id })
-        .del();
+          await trx('matches')
+            .where({ id: scoreboard.match_id })
+            .del();
 
-      const topics = [
-        'Set1_A',
-        'Set1_B',
-        'Set2_A',
-        'Set2_B',
-        'Set3_A',
-        'Set3_B',
-        'Score_A',
-        'Score_B',
-        'Current_Set',
-        'Is_Set_Tiebreak',
-        'Is_Match_Tiebreak',
-        'Match_Winner',
-        'Player_Serving'];
+          const topics = [
+            'Set1_A',
+            'Set1_B',
+            'Set2_A',
+            'Set2_B',
+            'Set3_A',
+            'Set3_B',
+            'Score_A',
+            'Score_B',
+            'Current_Set',
+            'Current_State',
+            'SetsWon_A',
+            'SetsWon_B',
+            'Match_Winner',
+            'Player_Serving',
+            'publisher'];
 
-      topics.forEach((topic) => broker.publish({
-        topic: `${scoreboardTopic}/${topic}`,
-        payload: '',
-        qos: 1,
-        retain: true,
-      }));
+          topics.forEach((topic) => broker.publish({
+            topic: `${scoreboardTopic}/${topic}`,
+            payload: '',
+            qos: 1,
+            retain: true,
+          }));
+        });
+      }, 1000 * 3 * 1);
 
-      res.status(200).json({ message: 'match_finished' });
+      res.status(200).json({ message: 'match_finish_scheduled' });
     } catch (error) {
       res.status(500).json({ message: error.toString() });
     }
