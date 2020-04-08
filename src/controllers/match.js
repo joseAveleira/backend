@@ -88,9 +88,7 @@ class MatchController {
         'Set3_B',
         'Score_A',
         'Score_B',
-        'Current_Set',
-        'Is_Set_Tiebreak',
-        'Is_Match_Tiebreak'];
+        'Current_Set'];
 
       topics.forEach((topic) => broker.publish({
         topic: `${scoreboardTopic}/${topic}`,
@@ -102,6 +100,24 @@ class MatchController {
       broker.publish({
         topic: `${scoreboardTopic}/Match_Winner`,
         payload: Buffer.from('null'),
+        retain: true,
+      });
+
+      broker.publish({
+        topic: `${scoreboardTopic}/Current_State`,
+        payload: Buffer.from('GAME'),
+        retain: true,
+      });
+
+      broker.publish({
+        topic: `${scoreboardTopic}/SetsWon_A`,
+        payload: Buffer.from('0'),
+        retain: true,
+      });
+
+      broker.publish({
+        topic: `${scoreboardTopic}/SetsWon_B`,
+        payload: Buffer.from('0'),
         retain: true,
       });
 
