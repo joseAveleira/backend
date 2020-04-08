@@ -80,7 +80,8 @@ class MatchController {
           refresh_token: refreshToken,
         });
 
-      const topics = ['Set1_A',
+      const topics = [
+        'Set1_A',
         'Set1_B',
         'Set2_A',
         'Set2_B',
@@ -88,7 +89,10 @@ class MatchController {
         'Set3_B',
         'Score_A',
         'Score_B',
-        'Current_Set'];
+        'Current_Set',
+        'SetsWon_A',
+        'SetsWon_B',
+        'Player_Serving'];
 
       topics.forEach((topic) => broker.publish({
         topic: `${scoreboardTopic}/${topic}`,
@@ -110,22 +114,8 @@ class MatchController {
       });
 
       broker.publish({
-        topic: `${scoreboardTopic}/SetsWon_A`,
-        payload: Buffer.from('0'),
-        retain: true,
-      });
-
-      broker.publish({
-        topic: `${scoreboardTopic}/SetsWon_B`,
-        payload: Buffer.from('0'),
-        retain: true,
-      });
-
-      const players = ['0', '1'];
-      broker.publish({
-        topic: `${scoreboardTopic}/Player_Serving`,
-        payload: Buffer.from(players[Math.floor(Math.random() * players.length)]),
-        retain: true,
+        topic: 'Scoreboards_Changed',
+        payload: Buffer.from(''),
       });
 
       res.json({ message: 'match_created', publish_token: publishToken, refresh_token: refreshToken });

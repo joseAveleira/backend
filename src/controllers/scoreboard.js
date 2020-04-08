@@ -207,8 +207,13 @@ class ScoreboardController {
             qos: 1,
             retain: true,
           }));
+
+          broker.publish({
+            topic: 'Scoreboards_Changed',
+            payload: Buffer.from(''),
+          });
         });
-      }, 1000 * 3 * 1);
+      }, 1000 * 10 * 1);
 
       res.status(200).json({ message: 'match_finish_scheduled' });
     } catch (error) {
