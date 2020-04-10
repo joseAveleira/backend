@@ -10,6 +10,7 @@ exports.seed = function (knex) {
           .map((i) => ({
             topic: `scoreboard${i}`,
             name: `Placar ${i}`,
+            static_token: 'mqtt1234',
           })),
 
       ));

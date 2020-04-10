@@ -45,6 +45,8 @@ async function addLog(broker, topic, data) {
     .join('matches', 'scoreboards.match_id', '=', 'matches.id')
     .first();
 
+  if (!scoreboardData) return;
+
   scoreboardData.player1_name = scoreboardData.player1_name || 'Jogador 1';
   scoreboardData.player2_name = scoreboardData.player2_name || 'Jogador 2';
 

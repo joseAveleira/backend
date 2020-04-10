@@ -22,10 +22,12 @@ const broker = new mosca.Server({
   },
 });
 
+
 async function checkPublishToken(scoreboardTopic, publishToken) {
   try {
     const scoreboard = await knex('scoreboards')
-      .where({ topic: scoreboardTopic, publish_token: publishToken })
+      .where({ topic: scoreboardTopic })
+      .andWhere((q) => q.where({ publish_token: publishToken }).orWhere({ static_token: publishToken }))
       .first();
 
     return scoreboard != null;
