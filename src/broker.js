@@ -1,33 +1,39 @@
 /* eslint-disable no-console */
-const mosca = require('mosca');
+const aedes = require('aedes');
+const http = require('http');
+const ws = require('websocket-stream');
+const net = require('net');
+const mongoPersistence = require('aedes-persistence-mongodb');
 const knex = require('./database');
-const logging = require('./logging');
 
-const broker = new mosca.Server({
-  port: 1883,
-  backend: {
-    type: 'mongo',
+const broker = aedes({
+  persistence: mongoPersistence({
     url: `mongodb://${process.env.NODE_ENV === 'production' ? 'mongodb' : 'localhost'}:27017/mqtt`,
-    pubsubCollection: 'scoreboard',
-    mongo: {},
-  },
-  http: {
-    port: 8081,
-    bundle: true,
-    static: './',
-  },
-  persistence: {
-    factory: mosca.persistence.Mongo,
-    url: `mongodb://${process.env.NODE_ENV === 'production' ? 'mongodb' : 'localhost'}:27017/mqtt`,
-  },
+  }),
 });
 
+const httpServer = http.createServer();
+
+ws.createServer({
+  server: httpServer,
+}, broker.handle);
+
+httpServer.listen(8081, () => {
+  console.log('Aedes server (WebSocket) running');
+});
+
+const server = net.createServer(broker.handle);
+
+server.listen(1883, () => {
+  console.log('Aedes server (Standalone) running');
+});
 
 async function checkPublishToken(scoreboardTopic, publishToken) {
   try {
     const scoreboard = await knex('scoreboards')
       .where({ topic: scoreboardTopic })
-      .andWhere((q) => q.where({ publish_token: publishToken }).orWhere({ static_token: publishToken }))
+      .andWhere((q) => q.where({ publish_token: publishToken })
+        .orWhere({ static_token: publishToken }))
       .first();
 
     return scoreboard != null;
@@ -36,38 +42,35 @@ async function checkPublishToken(scoreboardTopic, publishToken) {
   }
 }
 
-broker.authorizePublish = async (client, topic, payload, callback) => {
+broker.authorizePublish = async (client, packet, callback) => {
   try {
-    const [scoreboardTopic, field] = topic.split('/');
+    const [scoreboardTopic, field] = packet.topic.split('/');
 
     if (!scoreboardTopic || !field) {
-      return callback(null, false);
+      return callback(new Error('unauthorized'));
     }
 
     if (field === 'publisher') {
-      return callback(null, false);
+      return callback(new Error('unauthorized'));
     }
 
-    const data = JSON.parse(payload.toString());
+    const data = JSON.parse(packet.payload.toString());
 
     if (!data || !data.publish_token) {
-      return callback(null, false);
+      return callback(new Error('unauthorized'));
     }
 
     if (!await checkPublishToken(scoreboardTopic, data.publish_token)) {
-      return callback(null, false);
+      return callback(new Error('unauthorized'));
     }
 
-    logging.addLog(broker, topic, data);
+    // eslint-disable-next-line no-param-reassign
+    packet.payload = Buffer.from(data.payload);
 
-    return callback(null, Buffer.from(data.payload));
+    return callback(null);
   } catch (error) {
-    return callback(null, false);
+    return callback(new Error('unauthorized'));
   }
 };
-
-broker.on('ready', () => {
-  console.log('Broker executando');
-});
 
 module.exports = { broker, checkPublishToken };
