@@ -18,15 +18,18 @@ ws.createServer({
   server: httpServer,
 }, broker.handle);
 
-httpServer.listen(8081, () => {
-  console.log('Aedes server (WebSocket) running');
-});
 
 const server = net.createServer(broker.handle);
 
-server.listen(1883, () => {
-  console.log('Aedes server (Standalone) running');
-});
+async function listen() {
+  httpServer.listen(8081, () => {
+    console.log('Aedes server (WebSocket) running');
+  });
+
+  server.listen(1883, () => {
+    console.log('Aedes server (Standalone) running');
+  });
+}
 
 async function checkPublishToken(scoreboardTopic, publishToken) {
   try {
@@ -73,4 +76,4 @@ broker.authorizePublish = async (client, packet, callback) => {
   }
 };
 
-module.exports = { broker, checkPublishToken };
+module.exports = { broker, checkPublishToken, listen };
