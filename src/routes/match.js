@@ -1,10 +1,22 @@
 const express = require('express');
-const MatchController = require('../controllers/match');
-const { AdminAuthMiddleware } = require('../middlewares/auth');
+const matchController = require('../controllers/match');
+const validate = require('../middlewares/validation');
+const validations = require('../validations/match');
 
 const router = express.Router();
 
-router.post('/', AdminAuthMiddleware, MatchController.create);
-router.get('/:match_id/logs', MatchController.getLogs);
+router.get('/:matchId/logs',
+  validate(validations.getLogs),
+  matchController.getLogs);
+
+router.post('/',
+  validate(validations.createMatch),
+  matchController.createMatch);
+
+router.delete('/:matchId',
+  validate(validations.finishMatch),
+  matchController.finishMatch);
+
+router.post('/:match_id/logs', matchController.addLog);
 
 module.exports = router;

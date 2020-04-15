@@ -1,30 +1,25 @@
 
-exports.seed = function (knex) {
-  // Deletes ALL existing entries
-  return knex('matches').del()
-    .then(() =>
-      // Inserts seed entries
-      knex('matches').insert([
-        {
-          player1_name: 'Federer',
-          player2_name: 'Nadal',
-          tiebreak_type: 'REGULAR',
-          advantage: true,
-          score_type: 'BASIC',
-        },
-        {
-          player1_name: 'Federer',
-          player2_name: 'Djokovic',
-          tiebreak_type: 'REGULAR',
-          advantage: false,
-          score_type: 'BASIC',
-        },
-        {
-          player1_name: 'Foo',
-          player2_name: 'Bar',
-          tiebreak_type: 'TEN_POINTS',
-          advantage: false,
-          score_type: 'BASIC',
-        },
-      ]));
-};
+exports.seed = (knex) => knex('Match').del()
+  .then(() => knex('Match').insert([
+    {
+      player1: 'Federer',
+      player2: 'Nadal',
+      tieBreakType: 'REGULAR',
+      hasAdvantage: true,
+      scoreType: 'BASIC',
+    },
+    {
+      player1: 'Federer',
+      player2: 'Djokovic',
+      tieBreakType: 'REGULAR',
+      hasAdvantage: false,
+      scoreType: 'BASIC',
+    },
+    {
+      player1: 'Foo',
+      player2: 'Bar',
+      tieBreakType: 'TEN_POINTS',
+      hasAdvantage: false,
+      scoreType: 'BASIC',
+    },
+  ]));

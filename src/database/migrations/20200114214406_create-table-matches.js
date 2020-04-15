@@ -1,39 +1,40 @@
 
-exports.up = function (knex) {
-  return knex.schema
-    .createTable('matches', (table) => {
-      table
-        .increments('id')
-        .primary();
+exports.up = (knex) => knex.schema
+  .createTable('Match', (table) => {
+    table
+      .increments('id')
+      .primary();
 
-      table
-        .string('player1_name');
+    table
+      .string('player1');
 
-      table
-        .string('player2_name');
+    table
+      .string('player2');
 
-      table
-        .enu('tiebreak_type', ['REGULAR', 'TEN_POINTS'])
-        .notNullable()
-        .defaultTo('REGULAR');
+    table
+      .enu('tieBreakType', ['REGULAR', 'TEN_POINTS'])
+      .notNullable()
+      .defaultTo('REGULAR');
 
-      table
-        .boolean('advantage')
-        .notNullable()
-        .defaultTo(true);
+    table
+      .boolean('hasAdvantage')
+      .notNullable()
+      .defaultTo(true);
 
-      table
-        .enu('score_type', ['BASIC', 'ADVANCED'])
-        .notNullable()
-        .defaultTo('BASIC');
+    table
+      .enu('scoreType', ['BASIC', 'ADVANCED'])
+      .notNullable()
+      .defaultTo('BASIC');
 
-      table
-        .datetime('start_time')
-        .defaultTo(knex.fn.now());
-    });
-};
+    table
+      .boolean('scheduledToDeletion')
+      .notNullable()
+      .defaultTo(false);
 
-exports.down = function (knex) {
-  return knex.schema
-    .dropTable('matches');
-};
+    table
+      .datetime('createdAt')
+      .defaultTo(knex.fn.now());
+  });
+
+exports.down = (knex) => knex.schema
+  .dropTable('Match');

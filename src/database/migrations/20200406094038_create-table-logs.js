@@ -1,37 +1,33 @@
 
-exports.up = function (knex) {
-  return knex.schema
-    .createTable('logs', (table) => {
-      table
-        .increments('id')
-        .primary();
+exports.up = (knex) => knex.schema
+  .createTable('Log', (table) => {
+    table
+      .increments('id')
+      .primary();
 
-      table
-        .integer('match_id')
-        .references('id')
-        .inTable('matches');
+    table
+      .integer('matchId')
+      .references('id')
+      .inTable('Match');
 
-      table
-        .enu('log_type', [
-          'SCORE',
-          'ACE',
-          'WINNER',
-          'DOUBLE_FAULT',
-          'GAME',
-          'SET',
-          'MATCH']);
+    table
+      .enu('logType', [
+        'SCORE',
+        'ACE',
+        'WINNER',
+        'DOUBLE_FAULT',
+        'GAME',
+        'SET',
+        'MATCH']);
 
-      table
-        .string('message')
-        .notNullable();
+    table
+      .string('message')
+      .notNullable();
 
-      table
-        .datetime('created_at')
-        .defaultTo(knex.fn.now());
-    });
-};
+    table
+      .datetime('createdAt')
+      .defaultTo(knex.fn.now());
+  });
 
-exports.down = function (knex) {
-  return knex.schema
-    .dropTable('logs');
-};
+exports.down = (knex) => knex.schema
+  .dropTable('Log');

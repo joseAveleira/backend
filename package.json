@@ -10,6 +10,7 @@
     "dev": "nodemon src/app.js"
   },
   "dependencies": {
+    "@hapi/joi": "^17.1.1",
     "aedes": "^0.41.0",
     "aedes-persistence-mongodb": "^8.0.1",
     "bcryptjs": "^2.4.3",

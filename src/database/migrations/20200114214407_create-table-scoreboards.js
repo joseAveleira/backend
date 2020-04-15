@@ -1,29 +1,28 @@
 
-exports.up = function (knex) {
-  return knex.schema
-    .createTable('scoreboards', (table) => {
-      table
-        .string('topic')
-        .primary();
+exports.up = (knex) => knex.schema
+  .createTable('Scoreboard', (table) => {
+    table
+      .string('topic')
+      .primary();
 
-      table
-        .string('name')
-        .notNullable();
+    table
+      .string('name')
+      .notNullable();
 
-      table
-        .string('publish_token');
+    table
+      .string('publishToken');
 
-      table
-        .string('refresh_token');
+    table
+      .string('refreshToken');
 
-      table
-        .integer('match_id')
-        .references('id')
-        .inTable('matches');
-    });
-};
+    table
+      .string('staticToken');
 
-exports.down = function (knex) {
-  return knex.schema
-    .dropTable('scoreboards');
-};
+    table
+      .integer('matchId')
+      .references('id')
+      .inTable('Match');
+  });
+
+exports.down = (knex) => knex.schema
+  .dropTable('Scoreboard');
