@@ -18,7 +18,6 @@ ws.createServer({
   server: httpServer,
 }, broker.handle);
 
-
 const server = net.createServer(broker.handle);
 
 async function listen() {

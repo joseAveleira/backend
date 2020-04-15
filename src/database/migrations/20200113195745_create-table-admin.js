@@ -1,26 +1,25 @@
 
-exports.up = function (knex) {
-  return knex.schema
-    .createTable('admins', (table) => {
-      table
-        .string('username')
-        .primary();
+exports.up = (knex) => knex.schema
+  .createTable('Admin', (table) => {
+    table
+      .string('userName')
+      .primary();
 
-      table
-        .string('name')
-        .notNullable();
+    table
+      .string('name')
+      .notNullable();
 
-      table
-        .string('password')
-        .notNullable();
+    table
+      .string('password')
+      .notNullable();
 
-      table
-        .datetime('created_at')
-        .defaultTo(knex.fn.now());
-    });
-};
+    table
+      .datetime('createdAt')
+      .defaultTo(knex.fn.now());
 
-exports.down = function (knex) {
-  return knex.schema
-    .dropTable('admins');
-};
+    table
+      .datetime('deletedAt');
+  });
+
+exports.down = (knex) => knex.schema
+  .dropTable('Admin');

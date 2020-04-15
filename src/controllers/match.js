@@ -1,77 +1,75 @@
-const crypto = require('crypto');
 const knex = require('../database');
 const { broker } = require('../broker');
+const { PreconditionFailedError } = require('../errors');
+const { refreshTokensAndUpdatePublisher } = require('../services/scoreboard');
 
-async function getLogs(req, res) {
-  const { match_id: matchId } = req.params;
+async function addLog(req, res) {
+  const { matchId } = req.params;
 
-  const logs = await knex('logs')
-    .select('id', 'log_type', 'message')
-    .where('match_id', '=', matchId)
-    .orderBy('id', 'asc');
+  const match = await knex('Match')
+    .select('id')
+    .where({ id: matchId })
+    .first();
 
-  return res.status(200).json({ message: 'logs found', data: logs });
+  if (!match) {
+    throw new PreconditionFailedError(2000);
+  }
 }
 
+async function getLogs(req, res) {
+  const { matchId } = req.params;
 
-async function create(req, res) {
+  const match = await knex('Match')
+    .select('id')
+    .where({ id: matchId })
+    .first();
+
+  if (!match) {
+    throw new PreconditionFailedError(2000);
+  }
+
+  const logs = await knex('Log')
+    .select('id', 'logType', 'message')
+    .where({ matchId })
+    .orderBy('id', 'asc');
+
+  return res
+    .status(200)
+    .json(logs);
+}
+
+async function createMatch(req, res) {
   const {
-    scoreboard_topic: scoreboardTopic,
-    player1_name: player1Name,
-    player2_name: player2Name,
-    tiebreak_type: tiebreakType,
-    advantage,
-    score_type: scoreType,
+    scoreboardTopic,
+    player1,
+    player2,
+    tieBreakType,
+    hasAdvantage,
+    scoreType,
   } = req.body;
 
-  if (!scoreboardTopic) {
-    return res.status(400).json({ message: 'invalid_scoreboard_topic' });
-  }
-
-  if (!['REGULAR', 'TEN_POINTS'].includes(tiebreakType)) {
-    return res.status(400).json({ message: 'invalid_tiebreak_type' });
-  }
-
-  if (advantage !== true && advantage !== false) {
-    return res.status(400).json({ message: 'invalid_advantage' });
-  }
-
-  if (!['BASIC', 'ADVANCED'].includes(scoreType)) {
-    return res.status(400).json({ message: 'invalid_score_type' });
-  }
-
-  const scoreboard = await knex('scoreboards')
+  const scoreboard = await knex('Scoreboard')
     .where({ topic: scoreboardTopic })
     .first();
 
   if (!scoreboard) {
-    return res.status(400).json({ message: 'scoreboard_not_found' });
+    throw new PreconditionFailedError(3000);
   }
 
-  if (scoreboard.match_id) {
-    return res.status(400).json({ message: 'scoreboard_not_free' });
+  if (scoreboard.matchId) {
+    throw new PreconditionFailedError(3001);
   }
 
-  const [matchId] = await knex('matches')
+  await knex('Match')
     .insert({
-      player1_name: player1Name,
-      player2_name: player2Name,
-      tiebreak_type: tiebreakType,
-      advantage,
-      score_type: scoreType,
-    })
-    .returning('id');
-
-  const publishToken = crypto.randomBytes(16).toString('hex');
-  const refreshToken = crypto.randomBytes(16).toString('hex');
-
-  await knex('scoreboards')
-    .where({ topic: scoreboardTopic })
-    .update({
-      match_id: matchId,
-      publish_token: publishToken,
-      refresh_token: refreshToken,
+      player1,
+      player2,
+      tieBreakType,
+      hasAdvantage,
+      scoreType,
     });
+
+  const newTokens = await refreshTokensAndUpdatePublisher(scoreboardTopic, false);
 
   const topics = [
     'Set1_A',
@@ -111,7 +109,92 @@ async function create(req, res) {
     payload: Buffer.from(''),
   });
 
-  return res.json({ message: 'match_created', publish_token: publishToken, refresh_token: refreshToken });
+  return res
+    .status(200)
+    .json(newTokens);
 }
 
-module.exports = { getLogs, create };
+async function finishMatch(req, res) {
+  const { matchId } = req.params;
+
+  const match = await knex('Match')
+    .select('id', 'scheduledToDeletion', { scoreboardTopic: 'Scoreboard.topic' })
+    .where({ id: matchId })
+    .join('Scoreboard', { 'Match.id': 'Scoreboard.matchId' })
+    .first();
+
+  if (!match) {
+    throw new PreconditionFailedError(2000);
+  }
+
+  if (match.scheduledToDeletion) {
+    throw new PreconditionFailedError(2001);
+  }
+
+  await knex('Match')
+    .where({ id: matchId })
+    .update({ scheduledToDeletion: true });
+
+  setTimeout(async () => {
+    try {
+      await knex.transaction(async (trx) => {
+        await trx('Log')
+          .where({ matchId })
+          .del();
+
+        await trx('Scoreboard')
+          .where({ topic: match.scoreboardTopic })
+          .update({
+            publishToken: null,
+            refreshToken: null,
+            matchId: null,
+          });
+
+        await trx('Match')
+          .where({ id: matchId })
+          .del();
+
+        const topics = [
+          'Set1_A',
+          'Set1_B',
+          'Set2_A',
+          'Set2_B',
+          'Set3_A',
+          'Set3_B',
+          'Score_A',
+          'Score_B',
+          'Current_Set',
+          'Current_State',
+          'SetsWon_A',
+          'SetsWon_B',
+          'Match_Winner',
+          'Player_Serving',
+          'publisher'];
+
+        topics.forEach((topic) => broker.publish({
+          topic: `${match.scoreboardTopic}/${topic}`,
+          payload: '',
+          qos: 1,
+          retain: true,
+        }));
+
+        broker.publish({
+          topic: 'Scoreboards_Changed',
+          payload: Buffer.from(''),
+        });
+      });
+    } catch (error) {
+      await knex('Match')
+        .where({ id: matchId })
+        .update({ scheduledToDeletion: false });
+    }
+  }, 1000 * 30 * 1);
+
+  return res
+    .status(200)
+    .send();
+}
+
+module.exports = {
+  addLog, getLogs, createMatch, finishMatch,
+};
