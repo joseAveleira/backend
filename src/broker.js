@@ -52,7 +52,7 @@ broker.authorizePublish = async (client, packet, callback) => {
       return callback(new Error('unauthorized'));
     }
 
-    if (field === 'publisher') {
+    if (field === 'Publisher') {
       return callback(new Error('unauthorized'));
     }
 

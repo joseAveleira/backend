@@ -174,7 +174,7 @@ async function finishMatch(req, res) {
           'SetsWon_B',
           'Match_Winner',
           'Player_Serving',
-          'publisher'];
+          'Publisher'];
 
         topics.forEach((topic) => broker.publish({
           topic: `${match.scoreboardTopic}/${topic}`,
@@ -193,7 +193,7 @@ async function finishMatch(req, res) {
         .where({ id: matchId })
         .update({ scheduledToDeletion: false });
     }
-  }, 1000 * 30 * 1);
+  }, 1000 * 5 * 1);
 
   return res
     .status(200)

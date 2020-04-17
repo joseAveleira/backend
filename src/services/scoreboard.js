@@ -15,7 +15,7 @@ async function refreshTokensAndUpdatePublisher(scoreboardTopic, updatePublisher 
 
   if (updatePublisher) {
     await broker.publish({
-      topic: `${scoreboardTopic}/publisher`,
+      topic: `${scoreboardTopic}/Publisher`,
       payload: `${Math.floor(Math.random() * (1000000 + 1))}`,
       qos: 1,
     });
