@@ -1,51 +1,75 @@
 const jwt = require('jsonwebtoken');
 const knex = require('../database');
+const { PreconditionFailedError, UnauthorizedError } = require('../errors');
 
-function AdminAuthMiddleware(req, res, next) {
+async function isAdmin(req, res, next) {
   try {
     const token = req.headers['x-access-token'];
-    res.locals.user = jwt.verify(token, process.env.JWT_SECRET || 'secret');
-    next();
-  } catch (error) {
-    res.status(401).json({ message: 'invalid_token' });
-  }
-}
 
-async function PublishTokenAuthMiddleware(req, res, next) {
-  try {
-    const publishToken = req.headers['x-publish-token'];
-    const scoreboardTopic = req.params.scoreboard_topic;
+    const { userName } = jwt.verify(token, process.env.JWT_SECRET || 'secret');
 
-    if (!publishToken) {
-      return res.status(401).json({ message: 'publish_token_required' });
-    }
-
-    if (!scoreboardTopic) {
-      return res.status(401).json({ message: 'scoreboard_topic_required' });
-    }
-
-    const scoreboard = await knex('scoreboards')
-      .where({ topic: scoreboardTopic, publish_token: publishToken })
+    const admin = await knex('Admin')
+      .where({ userName })
       .first();
 
-    if (!scoreboard) {
-      return res.status(401).json({ message: 'invalid_token' });
+    if (!admin) {
+      throw new UnauthorizedError(1002);
     }
 
-    next();
+    res.locals.user = admin;
+    return next();
   } catch (error) {
-    console.error(error);
-    res.status(401).json({ message: 'invalid_token' });
+    throw new UnauthorizedError(1002);
   }
 }
 
-function UniversalAuthMiddleware(req, res, next) {
+async function hasPublishToken(req, res, next) {
+  try {
+    const publishToken = req.headers['x-publish-token'];
+    const { matchId, scoreboardTopic } = req.params;
+
+    if (!publishToken) {
+      throw new PreconditionFailedError(1003);
+    }
+
+    if (matchId) {
+      const match = await knex('Match')
+        .select('id')
+        .where({ id: matchId, 'Scoreboard.publishToken': publishToken })
+        .join('Scoreboard', { 'Scoreboard.matchId': 'Match.id' })
+        .first();
+
+      if (!match) {
+        throw new PreconditionFailedError(1003);
+      }
+    } else if (scoreboardTopic) {
+      const scoreboard = await knex('Scoreboard')
+        .select('topic')
+        .where({ topic: scoreboardTopic, publishToken })
+        .first();
+
+      if (!scoreboard) {
+        throw new PreconditionFailedError(1003);
+      }
+    } else {
+      throw new PreconditionFailedError(1003);
+    }
+
+
+    return next();
+  } catch (error) {
+    throw new UnauthorizedError(1003);
+  }
+}
+
+async function isAdminOrHasPublishToken(req, res, next) {
   const token = req.headers['x-access-token'];
 
   if (token) {
-    return AdminAuthMiddleware(req, res, next);
+    return isAdmin(req, res, next);
   }
-  return PublishTokenAuthMiddleware(req, res, next);
+
+  return hasPublishToken(req, res, next);
 }
 
-module.exports = { AdminAuthMiddleware, PublishTokenAuthMiddleware, UniversalAuthMiddleware };
+module.exports = { isAdmin, hasPublishToken, isAdminOrHasPublishToken };

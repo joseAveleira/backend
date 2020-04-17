@@ -18,25 +18,27 @@ ws.createServer({
   server: httpServer,
 }, broker.handle);
 
-httpServer.listen(8081, () => {
-  console.log('Aedes server (WebSocket) running');
-});
-
 const server = net.createServer(broker.handle);
 
-server.listen(1883, () => {
-  console.log('Aedes server (Standalone) running');
-});
+async function listen() {
+  httpServer.listen(8081, () => {
+    console.log('Aedes server (WebSocket) running');
+  });
+
+  server.listen(1883, () => {
+    console.log('Aedes server (Standalone) running');
+  });
+}
 
 async function checkPublishToken(scoreboardTopic, publishToken) {
   try {
-    const scoreboard = await knex('scoreboards')
+    const scoreboard = await knex('Scoreboard')
       .where({ topic: scoreboardTopic })
-      .andWhere((q) => q.where({ publish_token: publishToken })
-        .orWhere({ static_token: publishToken }))
+      .andWhere((q) => q.where({ publishToken })
+        .orWhere({ staticToken: publishToken }))
       .first();
 
-    return scoreboard != null;
+    return scoreboard !== null;
   } catch (error) {
     return false;
   }
@@ -50,7 +52,7 @@ broker.authorizePublish = async (client, packet, callback) => {
       return callback(new Error('unauthorized'));
     }
 
-    if (field === 'publisher') {
+    if (field === 'Publisher') {
       return callback(new Error('unauthorized'));
     }
 
@@ -73,4 +75,4 @@ broker.authorizePublish = async (client, packet, callback) => {
   }
 };
 
-module.exports = { broker, checkPublishToken };
+module.exports = { broker, checkPublishToken, listen };
