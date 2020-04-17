@@ -1,9 +1,19 @@
-const crypto = require('crypto');
 const knex = require('../database');
 const { broker } = require('../broker');
+const { PreconditionFailedError } = require('../errors');
+const { refreshTokensAndUpdatePublisher } = require('../services/scoreboard');
 
 async function addLog(req, res) {
-  return res.status(200).json({});
+  const { matchId } = req.params;
+
+  const match = await knex('Match')
+    .select('id')
+    .where({ id: matchId })
+    .first();
+
+  if (!match) {
+    throw new PreconditionFailedError(2000);
+  }
 }
 
 async function getLogs(req, res) {
@@ -15,12 +25,7 @@ async function getLogs(req, res) {
     .first();
 
   if (!match) {
-    return res
-      .status(412)
-      .json({
-        code: 2000,
-        message: 'Match not found',
-      });
+    throw new PreconditionFailedError(2000);
   }
 
   const logs = await knex('Log')
@@ -48,21 +53,11 @@ async function createMatch(req, res) {
     .first();
 
   if (!scoreboard) {
-    return res
-      .status(412)
-      .json({
-        code: 3000,
-        message: 'Scoreboard not found',
-      });
+    throw new PreconditionFailedError(3000);
   }
 
   if (scoreboard.matchId) {
-    return res
-      .status(412)
-      .json({
-        code: 3001,
-        message: 'Scoreboard already has a match',
-      });
+    throw new PreconditionFailedError(3001);
   }
 
   const [matchId] = await knex('Match')
@@ -75,16 +70,11 @@ async function createMatch(req, res) {
     })
     .returning('id');
 
-  const publishToken = crypto.randomBytes(16).toString('hex');
-  const refreshToken = crypto.randomBytes(16).toString('hex');
-
   await knex('Scoreboard')
     .where({ topic: scoreboardTopic })
-    .update({
-      matchId,
-      publishToken,
-      refreshToken,
-    });
+    .update({ matchId });
+
+  const newTokens = await refreshTokensAndUpdatePublisher(scoreboardTopic, false);
 
   const topics = [
     'Set1_A',
@@ -126,7 +116,7 @@ async function createMatch(req, res) {
 
   return res
     .status(200)
-    .json({ publishToken, refreshToken });
+    .json(newTokens);
 }
 
 async function finishMatch(req, res) {
@@ -139,21 +129,11 @@ async function finishMatch(req, res) {
     .first();
 
   if (!match) {
-    return res
-      .status(412)
-      .json({
-        code: 2000,
-        message: 'Match not found',
-      });
+    throw new PreconditionFailedError(2000);
   }
 
   if (match.scheduledToDeletion) {
-    return res
-      .status(412)
-      .json({
-        code: 2001,
-        message: 'Match is already being deleted, please wait',
-      });
+    throw new PreconditionFailedError(2001);
   }
 
   await knex('Match')
@@ -194,7 +174,7 @@ async function finishMatch(req, res) {
           'SetsWon_B',
           'Match_Winner',
           'Player_Serving',
-          'publisher'];
+          'Publisher'];
 
         topics.forEach((topic) => broker.publish({
           topic: `${match.scoreboardTopic}/${topic}`,
@@ -213,7 +193,7 @@ async function finishMatch(req, res) {
         .where({ id: matchId })
         .update({ scheduledToDeletion: false });
     }
-  }, 1000 * 30 * 1);
+  }, 1000 * 5 * 1);
 
   return res
     .status(200)

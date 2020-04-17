@@ -6,10 +6,12 @@ exports.up = (knex) => knex.schema
       .primary();
 
     table
-      .string('player1');
+      .string('player1')
+      .notNullable();
 
     table
-      .string('player2');
+      .string('player2')
+      .notNullable();
 
     table
       .enu('tieBreakType', ['REGULAR', 'TEN_POINTS'])

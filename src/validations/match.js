@@ -24,13 +24,11 @@ module.exports = {
             .required(),
 
           player1: Joi.string()
-            .alphanum()
             .min(1)
             .max(150)
             .required(),
 
           player2: Joi.string()
-            .alphanum()
             .min(1)
             .max(150)
             .required(),
@@ -54,6 +52,30 @@ module.exports = {
         .keys({
           matchId: Joi.number()
             .min(1)
+            .required(),
+        })
+        .required(),
+    })
+    .required(),
+
+  addLog: Joi.object()
+    .keys({
+      params: Joi.object()
+        .keys({
+          matchId: Joi.number()
+            .min(1)
+            .required(),
+        })
+        .required(),
+
+      body: Joi.object()
+        .keys({
+          logType: Joi.valid('SCORE', 'ACE', 'WINNER', 'DOUBLE_FAULT', 'GAME', 'SET', 'MATCH')
+            .required(),
+
+          message: Joi.string()
+            .min(1)
+            .max(150)
             .required(),
         })
         .required(),

@@ -1,6 +1,8 @@
 const crypto = require('crypto');
 const knex = require('../database');
 const { broker, checkPublishToken } = require('../broker');
+const { refreshTokensAndUpdatePublisher } = require('../services/scoreboard');
+const { PreconditionFailedError } = require('../errors');
 
 async function listScoreboards(req, res) {
   const scoreboards = await knex('Scoreboard')
@@ -25,7 +27,7 @@ async function listScoreboards(req, res) {
 
 async function getScoreboard(req, res) {
   const { scoreboardTopic } = req.params;
-  const { 'publish-token': publishToken } = req.headers;
+  const { 'x-publish-token': publishToken } = req.headers;
 
   const scoreboard = await knex('Scoreboard')
     .select('topic',
@@ -42,12 +44,7 @@ async function getScoreboard(req, res) {
     .first();
 
   if (!scoreboard) {
-    return res
-      .status(412)
-      .json({
-        code: 3000,
-        message: 'Scoreboard not found',
-      });
+    throw new PreconditionFailedError(3000);
   }
 
   const processedScoreboard = {
@@ -80,54 +77,22 @@ async function refreshTokens(req, res) {
     .first();
 
   if (!scoreboard) {
-    return res
-      .status(412)
-      .json({
-        code: 3000,
-        message: 'Scoreboard not found',
-      });
+    throw new PreconditionFailedError(3000);
   }
 
   if (!scoreboard.matchId) {
-    return res
-      .status(412)
-      .json({
-        code: 3002,
-        message: 'Scoreboard doesnt have a match',
-      });
+    throw new PreconditionFailedError(3002);
   }
 
   if (scoreboard.refreshToken !== refreshToken) {
-    return res
-      .status(401)
-      .json({
-        code: 1001,
-        message: 'Invalid refresh token',
-      });
+    throw new PreconditionFailedError(1001);
   }
 
-  const newPublishToken = crypto.randomBytes(16).toString('hex');
-  const newRefreshToken = crypto.randomBytes(16).toString('hex');
-
-  await knex('Scoreboard')
-    .where({ topic: scoreboardTopic })
-    .update({
-      publishToken: newPublishToken,
-      refreshToken: newRefreshToken,
-    });
-
-  await broker.publish({
-    topic: `${scoreboardTopic}/publisher`,
-    payload: `${Math.floor(Math.random() * (1000000 + 1))}`,
-    qos: 1,
-  });
+  const newTokens = await refreshTokensAndUpdatePublisher(scoreboardTopic);
 
   return res
     .status(200)
-    .json({
-      publishToken: newPublishToken,
-      refreshToken: newRefreshToken,
-    });
+    .json(newTokens);
 }
 
 async function takeControl(req, res) {
@@ -139,48 +104,19 @@ async function takeControl(req, res) {
     .first();
 
   if (!scoreboard) {
-    return res
-      .status(412)
-      .json({
-        code: 3000,
-        message: 'Scoreboard not found',
-      });
+    throw new PreconditionFailedError(3000);
   }
-
 
   if (!scoreboard.matchId) {
-    return res
-      .status(412)
-      .json({
-        code: 3002,
-        message: 'Scoreboard doesnt have a match',
-      });
+    throw new PreconditionFailedError(3002);
   }
 
-  const newPublishToken = crypto.randomBytes(16).toString('hex');
-  const newRefreshToken = crypto.randomBytes(16).toString('hex');
-
-  await knex('Scoreboard')
-    .where({ topic: scoreboardTopic })
-    .update({
-      publishToken: newPublishToken,
-      refreshToken: newRefreshToken,
-    });
-
-  await broker.publish({
-    topic: `${scoreboardTopic}/publisher`,
-    payload: `${Math.floor(Math.random() * (1000000 + 1))}`,
-    qos: 1,
-  });
+  const newTokens = await refreshTokensAndUpdatePublisher(scoreboardTopic);
 
   return res
     .status(200)
-    .json({
-      publishToken: newPublishToken,
-      refreshToken: newRefreshToken,
-    });
+    .json(newTokens);
 }
-
 
 module.exports = {
   listScoreboards, getScoreboard, refreshTokens, takeControl,

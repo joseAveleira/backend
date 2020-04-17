@@ -4,8 +4,9 @@
 | Código | Descrição                        |
 | ---    | ---                              |
 | 1000   | Credenciais inválidas            |
-| 1001   | Código de refresh inválido       |
+| 1001   | refreshToken inválido            |
 | 1002   | Token inválido                   |
+| 1003   | publishToken inválido            |
 
 ## Match
 | Código | Descrição                        |

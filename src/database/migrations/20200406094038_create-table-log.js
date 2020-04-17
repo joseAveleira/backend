@@ -7,6 +7,7 @@ exports.up = (knex) => knex.schema
 
     table
       .integer('matchId')
+      .notNullable()
       .references('id')
       .inTable('Match');
 
@@ -18,7 +19,8 @@ exports.up = (knex) => knex.schema
         'DOUBLE_FAULT',
         'GAME',
         'SET',
-        'MATCH']);
+        'MATCH'])
+      .notNullable();
 
     table
       .string('message')

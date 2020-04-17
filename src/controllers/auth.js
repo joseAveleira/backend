@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { UnauthorizedError } = require('../errors');
 
 const knex = require('../database');
 
@@ -12,23 +13,13 @@ async function signIn(req, res) {
     .first();
 
   if (!admin) {
-    return res
-      .status(401)
-      .json({
-        code: 1000,
-        message: 'Wrong credentials',
-      });
+    throw new UnauthorizedError(1000);
   }
 
   const isPasswordCorrect = await bcrypt.compare(password, admin.password);
 
   if (!isPasswordCorrect) {
-    return res
-      .status(401)
-      .json({
-        code: 1000,
-        message: 'Wrong credentials',
-      });
+    throw new UnauthorizedError(1000);
   }
 
   const token = await jwt.sign({ userName }, process.env.JWT_SECRET || 'secret');
