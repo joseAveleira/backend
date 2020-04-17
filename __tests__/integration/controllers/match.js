@@ -177,6 +177,7 @@ describe('createMatch', () => {
 
     expect(updatedScoreboard.publishToken).toStrictEqual(response.body.publishToken);
     expect(updatedScoreboard.refreshToken).toStrictEqual(response.body.refreshToken);
+    expect(updatedScoreboard.matchId).not.toBeNull();
   });
 });
 

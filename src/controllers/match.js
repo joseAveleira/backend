@@ -60,14 +60,19 @@ async function createMatch(req, res) {
     throw new PreconditionFailedError(3001);
   }
 
-  await knex('Match')
+  const [matchId] = await knex('Match')
     .insert({
       player1,
       player2,
       tieBreakType,
       hasAdvantage,
       scoreType,
-    });
+    })
+    .returning('id');
+
+  await knex('Scoreboard')
+    .where({ topic: scoreboardTopic })
+    .update({ matchId });
 
   const newTokens = await refreshTokensAndUpdatePublisher(scoreboardTopic, false);
 
