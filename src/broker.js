@@ -32,13 +32,13 @@ async function listen() {
 
 async function checkPublishToken(scoreboardTopic, publishToken) {
   try {
-    const scoreboard = await knex('scoreboards')
+    const scoreboard = await knex('Scoreboard')
       .where({ topic: scoreboardTopic })
-      .andWhere((q) => q.where({ publish_token: publishToken })
-        .orWhere({ static_token: publishToken }))
+      .andWhere((q) => q.where({ publishToken })
+        .orWhere({ staticToken: publishToken }))
       .first();
 
-    return scoreboard != null;
+    return scoreboard !== null;
   } catch (error) {
     return false;
   }

@@ -27,7 +27,7 @@ async function listScoreboards(req, res) {
 
 async function getScoreboard(req, res) {
   const { scoreboardTopic } = req.params;
-  const { 'publish-token': publishToken } = req.headers;
+  const { 'x-publish-token': publishToken } = req.headers;
 
   const scoreboard = await knex('Scoreboard')
     .select('topic',
