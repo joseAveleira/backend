@@ -5,15 +5,39 @@ const { refreshTokensAndUpdatePublisher } = require('../services/scoreboard');
 
 async function addLog(req, res) {
   const { matchId } = req.params;
+  const { logType, message } = req.body;
 
   const match = await knex('Match')
-    .select('id')
+    .select('id', { scoreboardTopic: 'Scoreboard.topic' })
     .where({ id: matchId })
+    .join('Scoreboard', { 'Scoreboard.matchId': 'Match.id' })
     .first();
 
   if (!match) {
     throw new PreconditionFailedError(2000);
   }
+
+  const [logId] = await knex('Log')
+    .insert({
+      matchId,
+      logType,
+      message,
+    })
+    .returning('id');
+
+  await broker.publish({
+    topic: `${match.scoreboardTopic}/Log`,
+    payload: JSON.stringify({
+      id: logId,
+      message,
+      logType,
+    }),
+    qos: 1,
+  });
+
+  return res
+    .status(201)
+    .send();
 }
 
 async function getLogs(req, res) {
