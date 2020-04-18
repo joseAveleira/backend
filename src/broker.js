@@ -3,12 +3,13 @@ const aedes = require('aedes');
 const http = require('http');
 const ws = require('websocket-stream');
 const net = require('net');
-const mongoPersistence = require('aedes-persistence-mongodb');
+const aedesPersistence = require('aedes-persistence-redis');
 const knex = require('./database');
 
 const broker = aedes({
-  persistence: mongoPersistence({
-    url: `mongodb://${process.env.NODE_ENV === 'production' ? 'mongodb' : 'localhost'}:27017/mqtt`,
+  persistence: aedesPersistence({
+    port: 6379,
+    host: process.env.NODE_ENV === 'production' ? 'redis' : 'localhost',
   }),
 });
 
