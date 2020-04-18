@@ -38,7 +38,7 @@ async function checkPublishToken(scoreboardTopic, publishToken) {
         .orWhere({ staticToken: publishToken }))
       .first();
 
-    return scoreboard !== null;
+    return scoreboard !== undefined;
   } catch (error) {
     return false;
   }
@@ -58,11 +58,11 @@ broker.authorizePublish = async (client, packet, callback) => {
 
     const data = JSON.parse(packet.payload.toString());
 
-    if (!data || !data.publish_token) {
+    if (!data || !data.publishToken) {
       return callback(new Error('unauthorized'));
     }
 
-    if (!await checkPublishToken(scoreboardTopic, data.publish_token)) {
+    if (!await checkPublishToken(scoreboardTopic, data.publishToken)) {
       return callback(new Error('unauthorized'));
     }
 
