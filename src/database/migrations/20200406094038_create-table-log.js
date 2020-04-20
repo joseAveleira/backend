@@ -19,7 +19,8 @@ exports.up = (knex) => knex.schema
         'DOUBLE_FAULT',
         'GAME',
         'SET',
-        'MATCH'])
+        'MATCH',
+        'ACTION'])
       .notNullable();
 
     table

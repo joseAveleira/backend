@@ -70,7 +70,7 @@ module.exports = {
 
       body: Joi.object()
         .keys({
-          logType: Joi.valid('SCORE', 'ACE', 'WINNER', 'DOUBLE_FAULT', 'GAME', 'SET', 'MATCH')
+          logType: Joi.valid('SCORE', 'ACE', 'WINNER', 'DOUBLE_FAULT', 'GAME', 'SET', 'MATCH', 'ACTION')
             .required(),
 
           message: Joi.string()
