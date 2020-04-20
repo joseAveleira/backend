@@ -138,6 +138,18 @@ async function createMatch(req, res) {
     payload: Buffer.from(''),
   });
 
+  broker.publish({
+    topic: `${scoreboardTopic}/Previous_States`,
+    payload: Buffer.from(JSON.stringify([])),
+    retain: true,
+  });
+
+  broker.publish({
+    topic: `${scoreboardTopic}/Forward_States`,
+    payload: Buffer.from(JSON.stringify([])),
+    retain: true,
+  });
+
   return res
     .status(200)
     .json(newTokens);
@@ -210,6 +222,17 @@ async function finishMatch(req, res) {
         broker.publish({
           topic: 'Scoreboards_Changed',
           payload: Buffer.from(''),
+        });
+
+        broker.publish({
+          topic: `${match.scoreboardTopic}/Previous_States`,
+          payload: '',
+          retain: true,
+        });
+        broker.publish({
+          topic: `${match.scoreboardTopic}/Forward_States`,
+          payload: '',
+          retain: true,
         });
       });
     } catch (error) {
