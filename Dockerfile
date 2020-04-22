@@ -12,6 +12,6 @@ RUN npm install --only=production --silent
 
 COPY . .
 
-EXPOSE 80
+EXPOSE 8080 8081
 
 CMD [ "npm", "start" ]
