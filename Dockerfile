@@ -10,9 +10,6 @@ COPY package*.json yarn.lock ./
 RUN npm set progress=false && npm config set depth 0
 RUN npm install --only=production --silent
 
-RUN npx knex migrate:latest
-RUN npx knex seed:run
-
 COPY . .
 
 EXPOSE 8080 8081
