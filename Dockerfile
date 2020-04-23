@@ -9,7 +9,7 @@ WORKDIR /usr/src/app
 COPY package*.json yarn.lock ./
 RUN npm set progress=false && npm config set depth 0
 RUN npm install --only=production --silent
-RUN npm intall -g knex
+RUN npm install -g knex
 
 COPY . .
 
