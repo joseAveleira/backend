@@ -45,6 +45,18 @@ async function checkPublishToken(scoreboardTopic, publishToken) {
   }
 }
 
+broker.on('client', () => {
+  console.log('[DEBUG] Client connected');
+});
+
+broker.on('clientError', (client, error) => {
+  console.log('[DEBUG] Client error', error);
+});
+
+broker.on('connectionError', (client, error) => {
+  console.log('[DEBUG] Connection error', error);
+});
+
 broker.authorizePublish = async (client, packet, callback) => {
   try {
     const [scoreboardTopic, field] = packet.topic.split('/');
@@ -72,6 +84,7 @@ broker.authorizePublish = async (client, packet, callback) => {
 
     return callback(null);
   } catch (error) {
+    console.log('[DEBUG] authorizePublish error', error);
     return callback(new Error('unauthorized'));
   }
 };
