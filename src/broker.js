@@ -3,14 +3,15 @@ const aedes = require('aedes');
 const http = require('http');
 const ws = require('websocket-stream');
 const net = require('net');
-const aedesPersistence = require('aedes-persistence-redis');
+const aedesPersistenceMongoDB = require('aedes-persistence-mongodb');
 const knex = require('./database');
 
 const broker = aedes({
-  persistence: aedesPersistence({
-    port: 6379,
-    host: process.env.NODE_ENV === 'production' ? 'redis' : 'localhost',
-  }),
+  persistence: aedesPersistenceMongoDB(
+    {
+      url: `mongodb://${process.env.NODE_ENV === 'production' ? 'broker_persistence' : 'localhost:27017'}/aedes`,
+    },
+  ),
 });
 
 const httpServer = http.createServer();
@@ -44,6 +45,7 @@ async function checkPublishToken(scoreboardTopic, publishToken) {
     return false;
   }
 }
+
 
 broker.on('client', () => {
   console.log('[DEBUG] Client connected');
